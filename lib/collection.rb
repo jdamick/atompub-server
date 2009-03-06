@@ -23,9 +23,12 @@ module Atom
             categories_list = [] << opts[:categories]
             opts[:categories] = categories_list.flatten
           end
-          @opts = opts
-        end
-        
+          @atom_pub_opts = opts
+          
+          collection_post_method = ENV['COLLECTION_POST_METHOD'] || :create
+          entry_put_method = ENV['ENTRY_PUT_METHOD'] || :update
+          self.before_filter :filter_content_type, :only => [collection_post_method, entry_put_method]
+        end        
       end
 
       module SingletonMethods
@@ -33,26 +36,12 @@ module Atom
           true
         end
         
-        def opts
-          @opts
+        def atom_pub_opts
+          @atom_pub_opts
         end
-        
-        collection_post_method = ENV['COLLECTION_POST_METHOD'] || :create
-        entry_put_method = ENV['ENTRY_PUT_METHOD'] || :update
-        ActionController::Base.before_filter :filter_content_type, :only => [collection_post_method, entry_put_method]
       end
 
       module InstanceMethods
-=begin
-    This filter format has been deprecated, 
-    please, visit http://ryandaigle.com/articles/2007/10/22/what-s-new-in-edge-rails-filters-get-tweaked for more info
-        def filter_content_type
-          self.class.opts[:accept].each do |type|
-            return true if (type == request.format)
-          end
-          return false
-        end
-=end
       end
     end
   end
